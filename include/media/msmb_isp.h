@@ -29,6 +29,7 @@ struct msm_isp_event_data32 {
 	} u;
 };
 
+#ifndef CONFIG_ARCH_MSM8940_XIAOMI_SANTONI_DTB
 struct msm_isp32_event_data32 {
 	struct compat_timeval timestamp;
 	struct compat_timeval mono_timestamp;
@@ -40,6 +41,7 @@ struct msm_isp32_event_data32 {
 		struct msm_isp32_error_info error_info;
 	} u;
 };
+#endif
 
 #endif
 #endif /* __MSMB_ISP__ */
