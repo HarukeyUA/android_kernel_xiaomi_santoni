@@ -184,14 +184,6 @@ static const struct usb_device_id usb_quirk_list[] = {
 	/* M-Systems Flash Disk Pioneers */
 	{ USB_DEVICE(0x08ec, 0x1000), .driver_info = USB_QUIRK_RESET_RESUME },
 
-	/* Baum Vario Ultra */
-	{ USB_DEVICE(0x0904, 0x6101), .driver_info =
-			USB_QUIRK_LINEAR_FRAME_INTR_BINTERVAL },
-	{ USB_DEVICE(0x0904, 0x6102), .driver_info =
-			USB_QUIRK_LINEAR_FRAME_INTR_BINTERVAL },
-	{ USB_DEVICE(0x0904, 0x6103), .driver_info =
-			USB_QUIRK_LINEAR_FRAME_INTR_BINTERVAL },
-
 	/* Keytouch QWERTY Panel keyboard */
 	{ USB_DEVICE(0x0926, 0x3333), .driver_info =
 			USB_QUIRK_CONFIG_INTF_STRINGS },
@@ -227,14 +219,6 @@ static const struct usb_device_id usb_quirk_list[] = {
 	/* Protocol and OTG Electrical Test Device */
 	{ USB_DEVICE(0x1a0a, 0x0200), .driver_info =
 			USB_QUIRK_LINEAR_UFRAME_INTR_BINTERVAL },
-
-	/* Corsair Strafe */
-	{ USB_DEVICE(0x1b1c, 0x1b15), .driver_info = USB_QUIRK_DELAY_INIT |
-	  USB_QUIRK_DELAY_CTRL_MSG },
-
-	/* Corsair Strafe RGB */
-	{ USB_DEVICE(0x1b1c, 0x1b20), .driver_info = USB_QUIRK_DELAY_INIT |
-	  USB_QUIRK_DELAY_CTRL_MSG },
 
 	/* Corsair K70 LUX RGB */
 	{ USB_DEVICE(0x1b1c, 0x1b33), .driver_info = USB_QUIRK_DELAY_INIT },
