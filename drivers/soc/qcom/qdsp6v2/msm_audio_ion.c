@@ -296,7 +296,7 @@ int msm_audio_ion_mmap(struct audio_buffer *ab,
 	struct scatterlist *sg;
 	unsigned int i;
 	struct page *page;
-	int ret = 0;
+	int ret;
 
 	pr_debug("%s\n", __func__);
 
@@ -697,7 +697,7 @@ static int msm_audio_smmu_init_legacy(struct device *dev)
 	struct dma_iommu_mapping *mapping;
 	struct device_node *ctx_node = NULL;
 	struct context_bank_info *cb;
-	int ret = 0;
+	int ret;
 	u32 read_val[2];
 
 	cb = devm_kzalloc(dev, sizeof(struct context_bank_info), GFP_KERNEL);
@@ -728,18 +728,10 @@ static int msm_audio_smmu_init_legacy(struct device *dev)
 	cb->addr_range.start = (dma_addr_t) read_val[0];
 	cb->addr_range.size = (size_t) read_val[1];
 	dev_dbg(dev, "%s Legacy iommu usage\n", __func__);
-
 	mapping = arm_iommu_create_mapping(
 				msm_iommu_get_bus(msm_audio_ion_data.cb_dev),
 					   cb->addr_range.start,
 					   cb->addr_range.size);
-	if (mapping == NULL) {
-		ret = -ENOMEM;
-		dev_err(dev, "%s: Failed to create IOMMU mapping, err = %d\n",
-			__func__, ret);
-		goto err_null;
-	}
-
 	if (IS_ERR(mapping))
 		return PTR_ERR(mapping);
 
@@ -758,27 +750,21 @@ static int msm_audio_smmu_init_legacy(struct device *dev)
 
 fail_attach:
 	arm_iommu_release_mapping(mapping);
-err_null:
 	return ret;
 }
 
 static int msm_audio_smmu_init(struct device *dev)
 {
 	struct dma_iommu_mapping *mapping;
-	int ret = 0;
+	int ret;
 	int disable_htw = 1;
 
 	mapping = arm_iommu_create_mapping(
 					msm_iommu_get_bus(dev),
 					   MSM_AUDIO_ION_VA_START,
 					   MSM_AUDIO_ION_VA_LEN);
-	if (mapping == NULL) {
-		ret = -ENOMEM;
-		dev_err(dev, "%s: Failed to create IOMMU mapping, err = %d\n",
-			__func__, ret);
-		goto err_null;
-	}
-
+	if (mapping == NULL)
+		goto fail_attach;
 	if (IS_ERR(mapping))
 		return PTR_ERR(mapping);
 
@@ -802,7 +788,6 @@ static int msm_audio_smmu_init(struct device *dev)
 
 fail_attach:
 	arm_iommu_release_mapping(mapping);
-err_null:
 	return ret;
 }
 

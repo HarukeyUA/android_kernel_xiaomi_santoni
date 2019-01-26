@@ -465,7 +465,7 @@ static void cpufreq_interactive_timer(unsigned long data)
 		ppol->policy->governor_data;
 	struct sched_load *sl = ppol->sl;
 	struct cpufreq_interactive_cpuinfo *pcpu;
-	unsigned int new_freq = 0;
+	unsigned int new_freq;
 	unsigned int prev_laf = 0, t_prevlaf;
 	unsigned int pred_laf = 0, t_predlaf = 0;
 	unsigned int prev_chfreq, pred_chfreq, chosen_freq;
@@ -1826,7 +1826,6 @@ struct cpufreq_governor cpufreq_gov_interactive = {
 static int __init cpufreq_interactive_init(void)
 {
 	struct sched_param param = { .sched_priority = MAX_RT_PRIO-1 };
-	int ret = 0;
 
 	spin_lock_init(&speedchange_cpumask_lock);
 	mutex_init(&gov_lock);
@@ -1843,12 +1842,7 @@ static int __init cpufreq_interactive_init(void)
 	/* NB: wake up so the thread does not look hung to the freezer */
 	wake_up_process_no_notif(speedchange_task);
 
-	ret = cpufreq_register_governor(&cpufreq_gov_interactive);
-	if (ret) {
-		kthread_stop(speedchange_task);
-		put_task_struct(speedchange_task);
-	}
-	return ret;
+	return cpufreq_register_governor(&cpufreq_gov_interactive);
 }
 
 #ifdef CONFIG_CPU_FREQ_DEFAULT_GOV_INTERACTIVE
