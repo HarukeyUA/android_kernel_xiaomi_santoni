@@ -25,6 +25,8 @@
 
 DEFINE_MSM_MUTEX(msm_flash_mutex);
 
+struct msm_flash_ctrl_t *flash_ctrl_wt = NULL;
+
 static struct v4l2_file_operations msm_flash_v4l2_subdev_fops;
 static struct led_trigger *torch_trigger;
 
@@ -432,9 +434,6 @@ static int32_t msm_flash_i2c_write_setting_array(
 	return rc;
 }
 
-
-struct msm_flash_ctrl_t *flash_ctrl_wt = NULL;
-
 static int32_t msm_flash_init(
 	struct msm_flash_ctrl_t *flash_ctrl,
 	struct msm_flash_cfg_data_t *flash_data)
@@ -542,12 +541,18 @@ static int32_t msm_flash_low(
 	return 0;
 }
 
+static bool gpio_flash_low = false;
+static bool gpio_flash_high = false;
+
 static int32_t msm_gpio_flash_low(
 		struct msm_flash_ctrl_t *flash_ctrl,
 		struct msm_flash_cfg_data_t *flash_data)
 {
 	CDBG("Enter\n");
-	gpio_direction_output(93, 1);
+	if (!gpio_flash_low) {
+		gpio_direction_output(93, 1);
+		gpio_flash_low = true;
+	}
 	return 0;
 }
 
@@ -556,7 +561,10 @@ static int32_t msm_gpio_flash_high(
 		struct msm_flash_cfg_data_t *flash_data)
 {
 	CDBG("Enter\n");
-	gpio_direction_output(90, 1);
+	if (!gpio_flash_high) {
+		gpio_direction_output(90, 1);
+		gpio_flash_high = true;
+	}
 	return 0;
 }
 
@@ -565,11 +573,18 @@ static int32_t msm_gpio_flash_off(
 		struct msm_flash_cfg_data_t *flash_data)
 {
 	CDBG("Enter\n");
-	gpio_direction_output(90, 0);
-	gpio_direction_output(93, 0);
+	/* flash low */
+	if (gpio_flash_low) {
+		gpio_direction_output(93, 0);
+		gpio_flash_low = false;
+	}
+	/* flash high */
+	if (gpio_flash_high) {
+		gpio_direction_output(90, 0);
+		gpio_flash_high = false;
+	}
 	return 0;
 }
-
 
 int flag_led = 0;
 
@@ -588,19 +603,16 @@ int32_t wt_flash_flashlight(bool boolean)
 	}
 
 	if (flash_ctrl_wt)  {
-		CDBG("WT Enter\n");
-
-		CDBG("WT_XJB  flash_ctrl_wt->torch_num_sources = %d", flash_ctrl_wt->torch_num_sources);
 		for (i = 0; i < flash_ctrl_wt->torch_num_sources - 1; i++) {
-			CDBG("WT low_flash_current[%d] = %d\n", i, curr);
-			if (flash_ctrl_wt->torch_trigger[i]) {
-				led_trigger_event(flash_ctrl_wt->torch_trigger[i],
-						curr);
-			}
+			if (flash_ctrl_wt->torch_trigger[i])
+				led_trigger_event(flash_ctrl_wt->torch_trigger[i], curr);
 		}
-		if (flash_ctrl_wt->switch_trigger)
-			led_trigger_event(flash_ctrl_wt->switch_trigger, 1);
-		CDBG("WT Exit\n");
+		if (flash_ctrl_wt->switch_trigger) {
+			if (boolean)
+				led_trigger_event(flash_ctrl_wt->switch_trigger, 1);
+			else
+				led_trigger_event(flash_ctrl_wt->switch_trigger, 0);
+		}
 	}
 	return 0;
 }
@@ -672,13 +684,12 @@ static int32_t msm_flash_config(struct msm_flash_ctrl_t *flash_ctrl,
 
 	CDBG("Enter %s type %d\n", __func__, flash_data->cfg_type);
 
-		 if (flash_data->cfg_type == 2 && flag_led > 0) {
-			flag_led--;
-		 } else if (flash_data->cfg_type == 3) {
-			flag_led++;
-		 } else if (flash_data->cfg_type == 1) {
-			flag_led = 0;
-		 }
+	if (flash_data->cfg_type == 2 && flag_led > 0)
+		flag_led--;
+	else if (flash_data->cfg_type == 3)
+		flag_led++;
+	else if (flash_data->cfg_type == 1)
+		flag_led = 0;
 
 	switch (flash_data->cfg_type) {
 	case CFG_FLASH_INIT:
