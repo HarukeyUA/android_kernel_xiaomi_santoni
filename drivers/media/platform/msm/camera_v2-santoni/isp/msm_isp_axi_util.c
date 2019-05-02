@@ -1703,7 +1703,7 @@ int msm_isp_cfg_offline_ping_pong_address(struct vfe_device *vfe_dev,
 	uint32_t stream_idx = HANDLE_TO_IDX(stream_info->stream_handle);
 	uint32_t buffer_size_byte = 0;
 	int32_t word_per_line = 0;
-	dma_addr_t paddr;
+	dma_addr_t paddr = 0;
 	uint32_t bufq_handle = 0;
 
 	if (stream_idx >= VFE_AXI_SRC_MAX) {
@@ -1782,7 +1782,7 @@ static int msm_isp_cfg_ping_pong_address(struct vfe_device *vfe_dev,
 	dma_addr_t paddr;
 	struct dual_vfe_resource *dual_vfe_res = NULL;
 	uint32_t vfe_id = 0;
-	unsigned long flags;
+	unsigned long flags = 0;
 
 	if (stream_idx >= VFE_AXI_SRC_MAX) {
 		pr_err("%s: Invalid stream_idx", __func__);
@@ -1848,7 +1848,9 @@ static int msm_isp_cfg_ping_pong_address(struct vfe_device *vfe_dev,
 
 		if (dual_vfe_res) {
 			for (vfe_id = 0; vfe_id < MAX_VFE; vfe_id++) {
-				if (vfe_id != vfe_dev->pdev->id)
+				bool lock = vfe_id != vfe_dev->pdev->id;
+
+				if (lock)
 					spin_lock_irqsave(
 						&vfe_dev->common_data->
 						common_dev_axi_lock, flags);
@@ -1878,7 +1880,7 @@ static int msm_isp_cfg_ping_pong_address(struct vfe_device *vfe_dev,
 						buf[!pingpong_bit] =
 						buf;
 				}
-				if (vfe_id != vfe_dev->pdev->id)
+				if (lock)
 					spin_unlock_irqrestore(
 						&vfe_dev->common_data->
 						common_dev_axi_lock, flags);
@@ -3431,7 +3433,7 @@ static void msm_isp_remove_buf_queue(struct vfe_device *vfe_dev,
 int msm_isp_update_axi_stream(struct vfe_device *vfe_dev, void *arg)
 {
 	int rc = 0, i, j;
-	struct msm_vfe_axi_stream *stream_info;
+	struct msm_vfe_axi_stream *stream_info = NULL;
 	struct msm_vfe_axi_shared_data *axi_data = &vfe_dev->axi_data;
 	struct msm_vfe_axi_stream_update_cmd *update_cmd = arg;
 	struct msm_vfe_axi_stream_cfg_update_info *update_info = NULL;
