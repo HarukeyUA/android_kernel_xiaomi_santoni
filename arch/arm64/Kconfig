@@ -315,14 +315,14 @@ config ARCH_MSM8940
 	  This enables support for the MSM8940 chipset. If you don't
 	  know what to do here, say N
 
-config ARCH_MSM8940_XIAOMI_SANTONI_DTB
-	bool "Enable Support DTB for XIAOMI Redmi 4X Santoni"
+config MACH_XIAOMI_SANTONI
+	bool "Enable Support for XIAOMI Redmi 4X (Santoni)"
 	depends on ARCH_MSM8940
 	default n
 
-config ARCH_MSM8940_XIAOMI_SANTONI_TREBLE
-	bool "Enable Support Treble XIAOMI Redmi 4X Santoni"
-	depends on ARCH_MSM8940_XIAOMI_SANTONI_DTB
+config MACH_XIAOMI_SANTONI_TREBLE
+	bool "Enable Support Treble XIAOMI Redmi 4X (Santoni)"
+	depends on MACH_XIAOMI_SANTONI
 	default n
 
 config ARCH_MSM8953
