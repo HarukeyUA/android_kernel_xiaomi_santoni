@@ -302,7 +302,7 @@ struct msm_camera_sensor_slave_info {
 	unsigned char  is_init_params_valid;
 	struct msm_sensor_init_params sensor_init_params;
 	enum msm_sensor_output_format_t output_format;
-#ifndef CONFIG_ARCH_MSM8940_XIAOMI_SANTONI_DTB
+#ifndef CONFIG_MACH_XIAOMI_SANTONI
 	uint8_t bypass_video_node_creation;
 #endif
 };

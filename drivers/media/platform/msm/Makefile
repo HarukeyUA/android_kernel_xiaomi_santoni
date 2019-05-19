@@ -5,7 +5,7 @@
 obj-$(CONFIG_MSM_VIDC_V4L2) += vidc/
 obj-y += broadcast/
 obj-$(CONFIG_DVB_MPQ) += dvb/
-ifeq ($(CONFIG_ARCH_MSM8940_XIAOMI_SANTONI_DTB),y)
+ifeq ($(CONFIG_MACH_XIAOMI_SANTONI),y)
 obj-$(CONFIG_MSMB_CAMERA) += camera_v2-santoni/
 else
 obj-$(CONFIG_MSMB_CAMERA) += camera_v2/
