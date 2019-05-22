@@ -139,16 +139,31 @@ static struct attribute_group charger_limiter_attr_group = {
 
 static int __init charger_limiter_init(void)
 {
-	int rc = 0;
+	int rc;
 
 	charger_limiter = kobject_create_and_add("charger_limiter", kernel_kobj);
-	rc = sysfs_create_group(charger_limiter, &charger_limiter_attr_group);
-	if (!rc) {
-		INIT_DELAYED_WORK(&charger_limiter_work, charger_limiter_worker);
-		schedule_delayed_work(&charger_limiter_work,
-						msecs_to_jiffies(10000));
+	if (!charger_limiter) {
+		pr_err("%s: Failed to allocate sysfs directory.\n", __func__);
+		rc = -ENOMEM;
+		goto err_out;
 	}
 
+	rc = sysfs_create_group(charger_limiter, &charger_limiter_attr_group);
+	if (rc) {
+		pr_err("%s: Failed to create sysfs attributes.\n", __func__);
+		goto err_free;
+	}
+
+	INIT_DELAYED_WORK(&charger_limiter_work, charger_limiter_worker);
+	schedule_delayed_work(&charger_limiter_work, msecs_to_jiffies(10000));
+
+	pr_info("%s: Initialized.\n", __func__);
+
 	return 0;
+
+err_free:
+	kobject_put(charger_limiter);
+err_out:
+	return rc;
 }
 late_initcall(charger_limiter_init);
