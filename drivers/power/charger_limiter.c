@@ -127,7 +127,7 @@ static struct global_attr charging_limit_attr =
 
 static struct attribute *charger_limiter_attributes[] = {
 	&charging_limit_attr.attr,
-	NULL
+	NULL,
 };
 
 static struct attribute_group charger_limiter_attr_group = {
